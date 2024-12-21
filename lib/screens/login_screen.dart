@@ -1,4 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:login_tokens/screens/screens.dart';
+import 'package:login_tokens/services/notification_service.dart';
+import 'package:login_tokens/services/services.dart';
 import 'package:login_tokens/ui/input_decorations.dart';
 import 'package:login_tokens/providers/providers.dart';
 import 'package:provider/provider.dart';
@@ -36,16 +40,25 @@ class LoginScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               TextButton(
-                  onPressed: () {
-                    Navigator.pushReplacementNamed(context, 'SignUp');
-                  },
-                  child: const Text(
-                    "Crear una nueva cuenta",
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black),
-                  ))
+                onPressed: () {
+                  Navigator.pushReplacementNamed(context, 'SignUp');
+                },
+                style: ButtonStyle(
+                  overlayColor: WidgetStatePropertyAll(
+                    Colors.indigo.withOpacity(0.2),
+                  ),
+                  shape: const WidgetStatePropertyAll(
+                    StadiumBorder(),
+                  ),
+                ),
+                child: const Text(
+                  "Crear una nueva cuenta",
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
+                ),
+              ),
             ],
           ),
         ),
@@ -122,11 +135,24 @@ class LoginBtn extends StatelessWidget {
             ? null
             : () async {
                 FocusScope.of(context).unfocus();
+
+                final authService =
+                    Provider.of<AuthService>(context, listen: false);
+
                 if (!loginForm.isValidForm()) return;
+
                 loginForm.isLoading = true;
-                await Future.delayed(const Duration(seconds: 2));
-                loginForm.isLoading = false;
-                Navigator.pushReplacementNamed(context, 'home');
+
+                final String? errorMessage = await authService.login(
+                    loginForm.email, loginForm.password);
+
+                if (errorMessage == null) {
+                  Navigator.pushReplacementNamed(context, 'home');
+                } else {
+                  print(errorMessage);
+                  NotificationService.showSnackbar(errorMessage);
+                  loginForm.isLoading = false;
+                }
               },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 15),

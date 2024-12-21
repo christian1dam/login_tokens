@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 enum Sex { male, female}
 
 class SignupFormProvider extends ChangeNotifier {
-  GlobalKey<FormState> formKey = new GlobalKey<FormState>();
+  GlobalKey<FormState> formKey = GlobalKey<FormState>();
   String usuario = '';
   String email = '';
   String password = '';

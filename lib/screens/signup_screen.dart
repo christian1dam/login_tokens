@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:login_tokens/providers/providers.dart';
+import 'package:login_tokens/services/notification_service.dart';
+import 'package:login_tokens/services/services.dart';
 import 'package:login_tokens/ui/input_decorations.dart';
 import 'package:provider/provider.dart';
 import 'package:login_tokens/widgets/widgets.dart';
@@ -15,7 +17,7 @@ class SignUpScreen extends StatelessWidget {
             children: [
               const SizedBox(height: 250),
               CardContainer(
-                height: 600,
+                height: 660,
                 child: Column(
                   children: [
                     const SizedBox(
@@ -32,6 +34,27 @@ class SignUpScreen extends StatelessWidget {
                         create: (_) => SignupFormProvider(),
                         child: _SingupForm()),
                   ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              TextButton(
+                onPressed: () {
+                  Navigator.pushReplacementNamed(context, 'login');
+                },
+                style: ButtonStyle(
+                  overlayColor: WidgetStatePropertyAll(
+                    Colors.indigo.withOpacity(0.2),
+                  ),
+                  shape: const WidgetStatePropertyAll(
+                    StadiumBorder(),
+                  ),
+                ),
+                child: const Text(
+                  "¿Ya tienes cuenta? Vuelve a Login",
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
                 ),
               ),
             ],
@@ -188,10 +211,22 @@ class SignUpBtn extends StatelessWidget {
             : () async {
                 FocusScope.of(context).unfocus();
                 if (!signUpForm.isValidForm()) return;
+
+                final authService =
+                    Provider.of<AuthService>(context, listen: false);
+
                 signUpForm.isLoading = true;
-                await Future.delayed(const Duration(seconds: 2));
-                signUpForm.isLoading = false;
-                Navigator.pushReplacementNamed(context, 'login');
+
+                final String? errorMessage = await authService.createUser(
+                    signUpForm.email, signUpForm.password);
+
+                if (errorMessage == null) {
+                  Navigator.pushReplacementNamed(context, 'home');
+                } else {
+                  print(errorMessage);
+                  NotificationService.showSnackbar(errorMessage);
+                  signUpForm.isLoading = false;
+                }
               },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 15),

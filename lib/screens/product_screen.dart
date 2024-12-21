@@ -58,8 +58,9 @@ class _ProductScreenBody extends StatelessWidget {
                             if (productForm.isValidForm()) {
                               final String? imageUrl =
                                   await productService.uploadImage();
-                              if (imageUrl != null)
+                              if (imageUrl != null) {
                                 productForm.product.picture = imageUrl;
+                              }
                             }
                           },
                   ),
